@@ -1,23 +1,23 @@
-/**
- * @class ExampleComponent
- */
+import { useState, useRef, useEffect } from 'react';
 
-import * as React from 'react'
+function useCallbackableState(initialState: any) {
+  const [state, setState] = useState(initialState);
+  
+  // @ts-ignore
+  let cbRef = useRef(() => {});
 
-import styles from './styles.css'
+  useEffect(() => {
+    // @ts-ignore
+    cbRef.current && cbRef.current(state);
+  }, [state, cbRef]);
 
-export type Props = { text: string }
-
-export default class ExampleComponent extends React.Component<Props> {
-  render() {
-    const {
-      text
-    } = this.props
-
-    return (
-      <div className={styles.test}>
-        Example Component: {text}
-      </div>
-    )
-  }
+  return [
+    state,
+    (arg: any, cb: any) => {
+      cbRef.current = cb;
+      setState.call(null, arg);
+    }
+  ];
 }
+
+export { useCallbackableState };
